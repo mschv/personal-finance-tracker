@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Personal Finance Tracker</h1>
+
+        <section class="upload">
+            <h2>Upload Your CSV File</h2>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".csv" required>
+                <button type="submit">Upload</button>
+            </form>
+        </section>
+
+        <section class="summary">
+            <h2>Summary by Category</h2>
+            <ul>
+                {% for category, total in summary.items() %}
+                    <li><strong>{{ category }}:</strong> ${{ '%.2f' | format(total) }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="charts">
+            <h2>Visualizations</h2>
+            <canvas id="categoryChart"></canvas>
+            <canvas id="monthlyChart"></canvas>
+            <canvas id="yearlyChart"></canvas>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const categoryLabels = {{ summary.keys() | list | tojson }};
+        const categoryData = {{ summary.values() | list | tojson }};
+
+        const monthlyLabels = {{ monthly.keys() | list | tojson }};
+        const monthlyData = {{ monthly.values() | list | tojson }};
+
+        const yearlyLabels = {{ yearly.keys() | list | tojson }};
+        const yearlyData = {{ yearly.values() | list | tojson }};
+
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'bar',
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    label: 'By Category',
+                    data: categoryData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Monthly Summary',
+                    data: monthlyData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    fill: false
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('yearlyChart'), {
+            type: 'bar',
+            data: {
+                labels: yearlyLabels,
+                datasets: [{
+                    label: 'Yearly Summary',
+                    data: yearlyData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                }]
+            }
+        });
+    </script>
+</body>
+</html>
